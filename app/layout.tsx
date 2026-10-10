@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Vazirmatn } from "next/font/google";
-import { MotionController } from "@/components/motion/MotionController";
 import { motionBootstrapScript } from "@/components/motion/bootstrap";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { imagePublicPath } from "@/lib/content/images";
@@ -8,11 +7,17 @@ import { site } from "@/lib/content/site";
 import { organizationJsonLd } from "@/lib/seo/structured-data";
 import "./globals.css";
 
-// Same family and weight range the reference loads from Google Fonts (300–900).
+/*
+ * Same family the reference loads from Google Fonts, self-hosted by next/font.
+ * The metric-adjusted fallback face is disabled on purpose: glyphs Vazirmatn
+ * lacks (the "←" arrows on every button) must fall through to the system font
+ * exactly as they do on the reference, or every button is 2px wider.
+ */
 const vazirmatn = Vazirmatn({
   subsets: ["arabic", "latin"],
   display: "swap",
   variable: "--font-vazirmatn",
+  adjustFontFallback: false,
 });
 
 export const metadata: Metadata = {
@@ -65,7 +70,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           رفتن به محتوای اصلی
         </a>
         {children}
-        <MotionController />
         <JsonLd data={organizationJsonLd} />
       </body>
     </html>

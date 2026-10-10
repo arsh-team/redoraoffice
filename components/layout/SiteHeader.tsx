@@ -5,7 +5,7 @@ import { SiteNav } from "./SiteNav";
 import { useHeaderHidden } from "./useScrollState";
 
 interface SiteHeaderProps {
-  active: NavKey;
+  active: NavKey | null;
   isCurrentPage?: boolean;
 }
 

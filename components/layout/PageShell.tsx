@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { MotionController } from "@/components/motion/MotionController";
 
 interface PageShellProps {
   /**
@@ -9,6 +10,12 @@ interface PageShellProps {
   children: ReactNode;
 }
 
+/** Outermost wrapper of every page: page-scope class plus scroll-driven motion. */
 export function PageShell({ pageClass, children }: PageShellProps) {
-  return <div className={pageClass ? `pageRoot ${pageClass}` : "pageRoot"}>{children}</div>;
+  return (
+    <div className={pageClass ? `pageRoot ${pageClass}` : "pageRoot"}>
+      {children}
+      <MotionController />
+    </div>
+  );
 }

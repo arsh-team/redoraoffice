@@ -106,10 +106,10 @@ export function getNextProject(slug: string): Project {
 
 /**
  * Gallery composition used by every reference case study:
- * cover (large), light kitchen, cover again, dark kitchen.
+ * cover (large), light kitchen, dark kitchen, cover again.
  */
 export function getProjectGallery(project: Project): readonly ImageKey[] {
-  return [project.cover, "light", project.cover, "dark"];
+  return [project.cover, "light", "dark", project.cover];
 }
 
 /**

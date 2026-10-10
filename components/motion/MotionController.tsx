@@ -1,22 +1,23 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 /**
- * Scroll-driven motion, ported from the reference's motion.js:
- * staggered section reveals, a one-off count-up on headline statistics and a
- * very small parallax offset on hero imagery (desktop only).
+ * Scroll-driven motion, ported from the reference's motion.js: staggered
+ * section reveals and a very small parallax offset on hero imagery (desktop only).
  *
  * It works on the rendered DOM by class name, exactly like the source, so the
- * page sections themselves stay Server Components. Elements matched by
- * REVEAL_SELECTOR must therefore keep a static `className` in React.
+ * page sections themselves stay Server Components. Two rules follow from that:
+ *
+ *  - Elements matched by REVEAL_SELECTOR must keep a static `className` in
+ *    React, or a re-render would drop the classes added here.
+ *  - The controller is rendered by PageShell, inside the page, so its effect
+ *    runs only after that page's markup has hydrated.
  */
 const REVEAL_SELECTOR =
   "main > section, main > .wrap, .sectionHead, .sectionTitle, .projectCard, .projectShowcase, .serviceCard, .valueCard, .journalCard, .magFeaturedCard, .pdIntro, .pdGalleryGrid figure, .pdFeatureVisual, .pdMaterialSample, .pdCompareCards figure, .contactCard, .faqItem";
-const COUNT_SELECTOR = ".stat strong,.stats strong,.metric strong,.projectsHeroStats strong";
 const PARALLAX_SELECTOR = ".heroMedia img,.organicImage img,.pdHero>img";
-const PERSIAN_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
+const REVEAL_RATIO = 0.09;
 
 declare global {
   interface Window {
@@ -25,31 +26,10 @@ declare global {
   }
 }
 
-function countUp(element: Element) {
-  const raw = (element.textContent ?? "").trim();
-  const match = raw.match(/([0-9۰-۹]+)/);
-  if (!match) return;
-  const end = Number(match[1].replace(/[۰-۹]/g, (digit) => String(PERSIAN_DIGITS.indexOf(digit))));
-  if (!Number.isFinite(end) || end > 9999) return;
-  const suffix = raw.replace(match[1], "");
-  const duration = 850;
-  let start: number | undefined;
-  const tick = (time: number) => {
-    start ??= time;
-    const progress = Math.min((time - start) / duration, 1);
-    element.textContent = Math.round(end * (1 - Math.pow(1 - progress, 3))) + suffix;
-    if (progress < 1) requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
-}
-
 export function MotionController() {
-  const pathname = usePathname();
-
   useEffect(() => {
     window.__redoraMotion = true;
-    const root = document.documentElement;
-    if (!root.classList.contains("motion-ready")) return;
+    if (!document.documentElement.classList.contains("motion-ready")) return;
 
     const seen = new WeakSet<Element>();
     let order = 0;
@@ -58,22 +38,18 @@ export function MotionController() {
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
+          // Reference rule: reveal once 9% of the element is in view. A block so
+          // tall that 9% of it exceeds the viewport could never get there, so it
+          // is revealed as soon as it appears — content must not stay hidden.
+          const unreachable =
+            entry.rootBounds !== null &&
+            entry.boundingClientRect.height * REVEAL_RATIO > entry.rootBounds.height;
+          if (entry.intersectionRatio < REVEAL_RATIO && !unreachable) continue;
           entry.target.classList.add("motion-in");
           revealObserver.unobserve(entry.target);
         }
       },
-      { threshold: 0.09, rootMargin: "0px 0px -7% 0px" },
-    );
-
-    const countObserver = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          countUp(entry.target);
-          countObserver.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.65 },
+      { threshold: [0, REVEAL_RATIO], rootMargin: "0px 0px -7% 0px" },
     );
 
     const register = () => {
@@ -85,11 +61,6 @@ export function MotionController() {
         element.style.setProperty("--reveal-delay", `${Math.min((order++ % 4) * 55, 165)}ms`);
         revealObserver.observe(element);
         fresh.push(element);
-      });
-      document.querySelectorAll(COUNT_SELECTOR).forEach((element) => {
-        if (seen.has(element)) return;
-        seen.add(element);
-        countObserver.observe(element);
       });
       if (fresh.length === 0) return;
       // Never leave content hidden when it is already above the fold.
@@ -104,7 +75,7 @@ export function MotionController() {
 
     register();
 
-    // Pick up content that streams in or mounts after the first pass.
+    // Pick up elements that mount after the first pass.
     const mutationObserver = new MutationObserver((records) => {
       const addedElements = records.some((record) =>
         Array.from(record.addedNodes).some((node) => node.nodeType === Node.ELEMENT_NODE),
@@ -138,11 +109,10 @@ export function MotionController() {
 
     return () => {
       revealObserver.disconnect();
-      countObserver.disconnect();
       mutationObserver.disconnect();
       detachParallax();
     };
-  }, [pathname]);
+  }, []);
 
   return null;
 }

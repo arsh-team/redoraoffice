@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "check": "npm run typecheck && npm run lint && npm run build && npm run test:e2e",
+    "audit:reference": "node scripts/capture.mjs reference",
+    "audit:local": "node scripts/capture.mjs local",
+    "audit:compare": "node scripts/compare.mjs"
   },
   "dependencies": {
     "next": "16.4.0",

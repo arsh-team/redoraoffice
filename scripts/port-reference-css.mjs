@@ -25,12 +25,22 @@ const rewrites = [
   // 1. Asset URLs: the source resolves them relative to /assets/.
   [/url\('images\//g, "url('/images/"],
   // 2. The motion flag lives on <html> here (set before first paint), not on <body>.
-  [/body\.motion-ready/g, ".motion-ready"],
+  //    (`html.` keeps the selector's specificity identical to the original `body.`.)
+  [/body\.motion-ready/g, "html.motion-ready"],
+  // 2b. On the source both the motion flag and the page class sit on <body>, so
+  //     "body.motion-ready .detailPageV47 …" can never match there. Keep those rules
+  //     inert here too by requiring both classes on one element.
+  [
+    /(?<!html)\.motion-ready (\.(?:aboutPage|servicesPage|innerPage|blogPage|contactPage|articlePage|detailPage|detailPageV47)\b)/g,
+    ".motion-ready$1",
+  ],
   // 3. Page-level classes sit on a wrapper <div class="pageRoot …"> instead of <body>,
-  //    so the one selector that inspects <body> itself is retargeted.
+  //    so the one selector that inspects <body> itself is retargeted. `div:where(…)`
+  //    keeps its specificity at (0,4,1): a later `main>section:not(…)` rule at (0,4,2)
+  //    must keep winning, exactly as it does on the source.
   [
     /body:not\(\.innerPage\):not\(\.contactPage\):not\(\.detailPageV47\)/g,
-    ".pageRoot:not(.innerPage):not(.contactPage):not(.detailPageV47)",
+    "div:where(.pageRoot):not(.innerPage):not(.contactPage):not(.detailPageV47)",
   ],
 ];
 

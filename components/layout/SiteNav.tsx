@@ -8,8 +8,8 @@ import { headerCta, mainNav, type NavKey } from "@/lib/content/navigation";
 import { useScrolled } from "./useScrollState";
 
 interface SiteNavProps {
-  /** Section to highlight in the menu. */
-  active: NavKey;
+  /** Section to highlight in the menu; null on pages outside the main sections (404, errors). */
+  active: NavKey | null;
   /** False on child pages (e.g. a case study), where the section is highlighted but is not the current page. */
   isCurrentPage?: boolean;
 }
@@ -51,7 +51,7 @@ export function SiteNav({ active, isCurrentPage = true }: SiteNavProps) {
     <>
       <nav className={scrolled ? "nav wrap scrolled" : "nav wrap"} aria-label="ناوبری اصلی">
         <Link className="brandLink" href="/" aria-label="Redora Office - صفحه اصلی">
-          <Image src={logo} className="logo" alt="Redora Office" sizes="120px" priority />
+          <Image src={logo} className="logo" alt="Redora Office" sizes="120px" loading="eager" />
         </Link>
         <div className="links">{links()}</div>
         <Link className="btn small" href={headerCta.href}>

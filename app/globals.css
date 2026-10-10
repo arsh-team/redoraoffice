@@ -15,7 +15,7 @@
 
 /* Design tokens measured from the reference (see docs/design-system.md). */
 @theme {
-  --font-sans: var(--font-vazirmatn), "Vazirmatn", Tahoma, system-ui, sans-serif;
+  --font-sans: var(--font-vazirmatn), system-ui, sans-serif;
 
   --color-redora-ink: #171614;
   --color-redora-charcoal: #252321;

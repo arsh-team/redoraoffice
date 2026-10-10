@@ -4,9 +4,14 @@
  * Next.js implementation needs it. See docs/design-system.md → "Additions".
  */
 
-/* next/font exposes Vazirmatn (and a metric-matched fallback) through a variable. */
-body {
-  font-family: var(--font-vazirmatn), "Vazirmatn", Tahoma, system-ui, sans-serif;
+/*
+ * Page-scope wrapper standing in for the reference's <body class="…">.
+ * `flow-root` makes it a block formatting context like that <body> (which has
+ * overflow-x: hidden), so the first section's top margin stays inside it and
+ * the page background starts at the very top.
+ */
+.pageRoot {
+  display: flow-root;
 }
 
 /*
@@ -16,6 +21,16 @@ body {
  */
 :where(img) {
   height: auto;
+}
+
+/*
+ * The oversized "PROJECT BRIEF" watermark is an absolutely positioned
+ * pseudo-element. On narrow screens it lies over the bottom of the wizard and,
+ * on the reference, swallows taps meant for the last option and the
+ * "continue" button. It stays exactly where it is but no longer takes input.
+ */
+.projectStart::after {
+  pointer-events: none;
 }
 
 /* The filter buttons and gallery images are real controls here. */
