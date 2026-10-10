@@ -1,0 +1,42 @@
+/*
+ * Cascade order: Tailwind theme tokens → the ported reference stylesheet and
+ * project additions (components layer) → Tailwind utilities.
+ *
+ * Tailwind's preflight reset is intentionally not imported: the reference
+ * stylesheet was authored against browser defaults plus its own reset, and
+ * preflight would change heading, list, image and button defaults under it.
+ */
+@layer theme, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "./styles/reference.css" layer(components);
+@import "./styles/enhancements.css" layer(components);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* Design tokens measured from the reference (see docs/design-system.md). */
+@theme {
+  --font-sans: var(--font-vazirmatn), "Vazirmatn", Tahoma, system-ui, sans-serif;
+
+  --color-redora-ink: #171614;
+  --color-redora-charcoal: #252321;
+  --color-redora-ivory: #f7f2ea;
+  --color-redora-paper: #f8f4ee;
+  --color-redora-sand: #e7ddcf;
+  --color-redora-muted: #756d64;
+  --color-redora-line: #ddd6cc;
+  --color-redora-red: #ef342f;
+  --color-redora-red-deep: #a42a25;
+
+  --radius-redora-sm: 18px;
+  --radius-redora-md: 34px;
+  --radius-redora-lg: 64px;
+
+  --shadow-redora: 0 26px 70px rgba(42, 32, 22, 0.12);
+  --ease-redora: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  --breakpoint-sm: 600px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 900px;
+  --breakpoint-xl: 1024px;
+  --breakpoint-2xl: 1180px;
+}

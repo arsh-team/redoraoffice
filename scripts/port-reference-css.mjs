@@ -1,0 +1,52 @@
+// Ports the reference site's stylesheet into this project.
+//
+//   node scripts/port-reference-css.mjs <path-to-downloaded-style.css>
+//
+// The reference stylesheet (https://redoraoffice.ir/assets/style.css) is ~60
+// revisions appended to one file, each overriding the previous. The rendered
+// design is the result of that whole cascade, so the port keeps every rule in
+// its original order and only applies the mechanical rewrites below.
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const input = process.argv[2];
+if (!input) {
+  console.error("Usage: node scripts/port-reference-css.mjs <path-to-style.css>");
+  process.exit(1);
+}
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const output = path.join(root, "app", "styles", "reference.css");
+
+let css = fs.readFileSync(input, "utf8");
+
+const rewrites = [
+  // 1. Asset URLs: the source resolves them relative to /assets/.
+  [/url\('images\//g, "url('/images/"],
+  // 2. The motion flag lives on <html> here (set before first paint), not on <body>.
+  [/body\.motion-ready/g, ".motion-ready"],
+  // 3. Page-level classes sit on a wrapper <div class="pageRoot …"> instead of <body>,
+  //    so the one selector that inspects <body> itself is retargeted.
+  [
+    /body:not\(\.innerPage\):not\(\.contactPage\):not\(\.detailPageV47\)/g,
+    ".pageRoot:not(.innerPage):not(.contactPage):not(.detailPageV47)",
+  ],
+];
+
+for (const [pattern, replacement] of rewrites) {
+  const before = css;
+  css = css.replace(pattern, replacement);
+  if (before === css) console.warn(`warning: rewrite had no effect: ${pattern}`);
+}
+
+const banner = `/*
+ * Ported from https://redoraoffice.ir/assets/style.css — do not edit by hand.
+ * Regenerate with scripts/port-reference-css.mjs; project-specific additions
+ * belong in app/styles/enhancements.css. See docs/design-system.md.
+ */
+`;
+
+fs.mkdirSync(path.dirname(output), { recursive: true });
+fs.writeFileSync(output, banner + css);
+console.log(`wrote ${path.relative(root, output)} (${css.length} bytes)`);

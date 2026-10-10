@@ -1,0 +1,118 @@
+/*
+ * Project-specific additions that sit on top of the ported reference stylesheet.
+ * Nothing here restyles a reference component; each rule exists because the
+ * Next.js implementation needs it. See docs/design-system.md → "Additions".
+ */
+
+/* next/font exposes Vazirmatn (and a metric-matched fallback) through a variable. */
+body {
+  font-family: var(--font-vazirmatn), "Vazirmatn", Tahoma, system-ui, sans-serif;
+}
+
+/*
+ * next/image emits width/height attributes for layout stability. The reference
+ * markup has none, so restore `height: auto` as the zero-specificity default;
+ * every reference rule that sets an explicit height still wins.
+ */
+:where(img) {
+  height: auto;
+}
+
+/* The filter buttons and gallery images are real controls here. */
+.filters button,
+.projectFilters button,
+.journalCats button,
+.swatches button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Keyboard users can open zoomable images; show the same affordance on focus. */
+img[role="button"] {
+  cursor: zoom-in;
+}
+
+/* Archive filtering/search hides cards without unmounting them. */
+.journalCard[hidden],
+.portfolioCard[hidden] {
+  display: none !important;
+}
+
+/* Shown only when a journal search/filter combination matches nothing. */
+.journalEmpty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 56px 24px;
+  border: 1px dashed var(--field-border, #d8cec2);
+  border-radius: var(--card-radius-lg, 24px);
+  color: var(--text-muted, #756d64);
+  text-align: center;
+}
+
+/*
+ * Submission feedback for the compact consultation and newsletter forms.
+ * The reference relies on a server redirect and has no inline status element.
+ */
+.consultOrganic form .formStatus,
+.journalNewsletter .formStatus {
+  grid-column: 1 / -1;
+  flex-basis: 100%;
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.formStatus a {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.journalNewsletter .formStatus {
+  margin: 12px 8px 0;
+}
+
+.journalNewsletter .formStatus.error {
+  color: #a42a25;
+}
+
+.journalNewsletter .formStatus.ok {
+  color: #1f6b3a;
+}
+
+/* Contact wizard: the failure panel reuses the success panel's surface. */
+.successPanel.failure b {
+  color: #a42a25;
+}
+
+.successPanel .panelActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 22px;
+  margin-top: 18px;
+}
+
+.successPanel button.linkButton {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--red);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Visually hidden labels for inputs that only carry a placeholder in the reference. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
